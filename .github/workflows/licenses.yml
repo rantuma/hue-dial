@@ -1,0 +1,36 @@
+name: Licenses
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Check licenses
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.26.1'
+
+      - name: Install go-licenses
+        run: go install github.com/google/go-licenses@latest
+
+      - name: Regenerate licenses
+        run: make licenses
+
+      - name: Check for diff
+        run: |
+          git add -A licenses/
+          if ! git diff --cached --exit-code licenses/; then
+            echo "::error::License files are out of date. Run 'make licenses' and commit the result."
+            exit 1
+          fi

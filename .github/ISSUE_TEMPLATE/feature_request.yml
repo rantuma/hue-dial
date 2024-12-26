@@ -1,0 +1,39 @@
+name: Feature Request
+description: Suggest a new behaviour or improvement.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the limitation or missing capability you're running into. Be specific — e.g. "I can't map the dial to a group of lights" rather than "more flexibility".
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the solution you'd like
+      description: What should hue-dial do differently? Include how it would be configured (e.g. new fields in config.json, new button behaviour).
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you've considered
+      description: Any other approaches or workarounds you thought about. Leave blank if none.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: hardware
+    attributes:
+      label: Which Hue hardware is this relevant to?
+      multiple: true
+      options:
+        - Tap Dial Switch
+        - Other (describe in solution above)
+    validations:
+      required: true
