@@ -13,8 +13,9 @@ type (
 	}
 
 	DialMapping struct {
-		ID    string
-		Label string
+		ID       string
+		Label    string
+		Inverted bool
 	}
 )
 

@@ -13,6 +13,7 @@ import (
 type (
 	Service interface {
 		Start() error
+		HandleEvent(evt ports.DeviceEvent)
 	}
 
 	service struct {
@@ -66,7 +67,7 @@ func (svc *service) Start() error {
 
 	go func() {
 		for evt := range eventChan {
-			svc.dispatchEvent(evt)
+			svc.HandleEvent(evt)
 		}
 	}()
 
@@ -78,6 +79,10 @@ func (svc *service) Start() error {
 	return nil
 }
 
+func (svc *service) HandleEvent(evt ports.DeviceEvent) {
+	svc.dispatchEvent(evt)
+}
+
 func (svc *service) dispatchEvent(evt ports.DeviceEvent) {
 	buttonMapping, buttonExists := svc.buttonMappingsByID[evt.DeviceID]
 	if buttonExists && evt.ButtonEvent != nil {
@@ -86,7 +91,7 @@ func (svc *service) dispatchEvent(evt ports.DeviceEvent) {
 	}
 
 	if dialMapping, exists := svc.dialMappingsByID[evt.DeviceID]; exists && evt.DialEvent != nil {
-		err := svc.handleDial(evt.DialEvent.Direction, evt.DialEvent.Steps)
+		err := svc.handleDial(evt.DialEvent.Direction, evt.DialEvent.Steps, dialMapping.Inverted)
 		if err != nil {
 			svc.logger.Errorf("failed to handle dial %q: %q", dialMapping.Label, err.Error())
 		}
@@ -110,9 +115,13 @@ func (svc *service) handleButtonEvent(
 	}
 }
 
-func (svc *service) handleDial(direction device.Direction, steps int) error {
+func (svc *service) handleDial(direction device.Direction, steps int, inverted bool) error {
 	brightnessDelta := float64(steps) * svc.config.Brightness.DeltaFactor
 	if direction == device.DirectionCounterClockwise {
+		brightnessDelta = -brightnessDelta
+	}
+
+	if inverted {
 		brightnessDelta = -brightnessDelta
 	}
 

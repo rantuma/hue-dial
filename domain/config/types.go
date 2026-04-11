@@ -38,8 +38,9 @@ type (
 	}
 
 	SetupDialMapping struct {
-		DialID string `json:"dial_id"`
-		Label  string `json:"label"`
+		DialID     string `json:"dial_id"`
+		Label      string `json:"label"`
+		InvertDial bool   `json:"invert_dial"`
 	}
 )
 
@@ -67,7 +68,7 @@ func (sc SetupConfig) ToConfig() Config {
 		Devices: DevicesConfig{
 			Buttons: buttons,
 			Dials: []device.DialMapping{
-				{ID: sc.Dial.DialID, Label: sc.Dial.Label},
+				{ID: sc.Dial.DialID, Label: sc.Dial.Label, Inverted: sc.Dial.InvertDial},
 			},
 		},
 	}

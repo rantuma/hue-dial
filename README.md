@@ -9,6 +9,7 @@ This service reacts to Philips Hue Tap Dial Switch events and controls lights vi
 - **Button short press** — selects the mapped lamp and triggers its identify animation.
 - **Button long press** — turns the mapped lamp off.
 - **Dial rotate** — adjusts brightness of the selected lamp. Clockwise increases, counter-clockwise decreases.
+- **Dial inverted** — if the dial is mounted upside down, enable `invert_dial` in the config to flip the rotation direction. The setup wizard prompts for this automatically.
 
 ## Quick start (Docker)
 
@@ -48,7 +49,19 @@ docker run -d \
 docker run -it --rm --network host -v "$(pwd)/data:/data" ghcr.io/rantuma/hue-dial --setup
 ```
 
-**Override the config path** (default: `/data/config.json`)
+**Config path resolution**
+
+When `CONFIG_PATH` is not set, the service tries each location in order and uses the first one whose parent directory is writable:
+
+| Priority | Path |
+|----------|------|
+| 1 | `/data/config.json` — default inside Docker |
+| 2 | `$XDG_CONFIG_HOME/hue-dial/config.json` (Linux) |
+| 2 | `~/Library/Application Support/hue-dial/config.json` (macOS) |
+| 2 | `%AppData%\hue-dial\config.json` (Windows) |
+| 3 | `./config.json` — current working directory |
+
+**Override the config path**
 
 ```bash
 docker run -d \
