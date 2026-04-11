@@ -151,8 +151,14 @@ func discoverAndConfigure(
 			fmt.Errorf("lamp selection failed: %w", err)
 	}
 
+	invertDial, err := promptInvertDial()
+	if err != nil {
+		return domainconfig.SetupConfig{},
+			fmt.Errorf("invert dial prompt failed: %w", err)
+	}
+
 	return buildSetupConfig(
-		bridgeIP, apiKey, buttonIDs, dialID, lampSelections,
+		bridgeIP, apiKey, buttonIDs, dialID, lampSelections, invertDial,
 	), nil
 }
 
@@ -162,6 +168,7 @@ func buildSetupConfig(
 	buttonIDs []string,
 	dialID string,
 	lamps []lampChoice,
+	invertDial bool,
 ) domainconfig.SetupConfig {
 	labels := [4]string{
 		"top left", "top right", "bottom left", "bottom right",
@@ -171,8 +178,9 @@ func buildSetupConfig(
 		BridgeIP: bridgeIP,
 		APIKey:   apiKey,
 		Dial: domainconfig.SetupDialMapping{
-			DialID: dialID,
-			Label:  "brightness control",
+			DialID:     dialID,
+			Label:      "brightness control",
+			InvertDial: invertDial,
 		},
 	}
 
@@ -264,6 +272,23 @@ type (
 		name string
 	}
 )
+
+func promptInvertDial() (bool, error) {
+	var inverted bool
+
+	err := huh.NewConfirm().
+		Title("Should the dial rotation direction be inverted?").
+		Description("If yes, the rotation direction will be inverted.").
+		Affirmative("Yes").
+		Negative("No").
+		Value(&inverted).
+		Run()
+	if err != nil {
+		return false, fmt.Errorf("invert dial confirm failed: %w", err)
+	}
+
+	return inverted, nil
+}
 
 func selectLampsForButtons(
 	lights hue.Lights,
